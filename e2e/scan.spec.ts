@@ -228,6 +228,19 @@ test('a site crawl resolves in-page anchors instead of calling them broken', asy
   })
 })
 
+test('the build output matches the source version', async () => {
+  // dist/manifest.json is what Chrome actually loads. Bumping the version in
+  // package.json and public/manifest.json without rebuilding ships a stale
+  // manifest, and the only symptom is the wrong number on chrome://extensions.
+  const { readFileSync } = await import('node:fs')
+  const { join } = await import('node:path')
+  const read = (...parts: string[]) => JSON.parse(readFileSync(join(root, ...parts), 'utf8')).version
+
+  const pkg = read('package.json')
+  expect(read('public', 'manifest.json'), 'package.json and the source manifest disagree').toBe(pkg)
+  expect(read('dist', 'manifest.json'), 'dist is stale — run npm run build').toBe(pkg)
+})
+
 test('the built pages carry no modulepreload tags', async () => {
   // Vite emits <link rel="modulepreload"> for shared chunks. On an extension
   // origin those preloads are never used, and Chrome files two warnings per tag
