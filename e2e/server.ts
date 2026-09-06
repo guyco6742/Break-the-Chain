@@ -26,7 +26,19 @@ export function startFixtureServer(): Promise<{ origin: string; close: () => Pro
           'content-type': 'text/html; charset=utf-8',
         })
       case '/ok':
-        return send(200, 'ok', { 'content-type': 'text/html' })
+        // A second page with its own anchors. The content script never runs
+        // here, so these can only be resolved by the crawler's HTML parser.
+        return send(
+          200,
+          `<!doctype html><html><body>
+             <h2 id="second-anchor">Second page anchor</h2>
+             <a href="#second-anchor">jump on the second page</a>
+             <a href="#top">back to top</a>
+             <a href="#not-here">dead anchor on the second page</a>
+             <a href="/missing">broken from the second page</a>
+           </body></html>`,
+          { 'content-type': 'text/html; charset=utf-8' },
+        )
       case '/missing':
       case '/missing.png':
       case '/shadow-missing':

@@ -8,6 +8,8 @@ export interface ParsedRef {
   raw: string
   text: string
   kind: 'link' | 'image' | 'script' | 'stylesheet'
+  /** Set for "#section" links: does that target exist in this page's HTML? */
+  anchorFound?: boolean
 }
 
 interface ParseRequest {
@@ -16,6 +18,9 @@ interface ParseRequest {
   html: string
   want: { images: boolean; scripts: boolean; stylesheets: boolean }
 }
+
+import { anchorExistsIn } from '../core/anchors.js'
+import { isInPageAnchor } from '../core/url.js'
 
 chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) => {
   const msg = message as ParseRequest
@@ -29,10 +34,12 @@ function parse(html: string, want: ParseRequest['want']): ParsedRef[] {
   const refs: ParsedRef[] = []
 
   for (const a of Array.from(doc.querySelectorAll('a[href], area[href]'))) {
+    const raw = a.getAttribute('href') ?? ''
     refs.push({
-      raw: a.getAttribute('href') ?? '',
+      raw,
       text: (a.textContent ?? '').trim().slice(0, 200),
       kind: 'link',
+      anchorFound: isInPageAnchor(raw) ? anchorExistsIn(doc, raw) : undefined,
     })
   }
   if (want.images) {

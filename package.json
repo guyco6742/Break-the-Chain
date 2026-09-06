@@ -1,6 +1,6 @@
 {
   "name": "break-the-chain",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A Chrome (MV3) extension that finds broken links, dead anchors and redirect chains on any page — or across a whole site.",
   "private": true,
   "type": "module",

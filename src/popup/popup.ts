@@ -93,7 +93,7 @@ function render(p: ScanProgress): void {
 
   els.status.textContent = p.running
     ? p.mode === 'site'
-      ? `Crawling — ${p.pagesCrawled} pages, ${totals.checked}/${totals.total} refs checked`
+      ? `Crawling — ${p.pagesCrawled} ${p.pagesCrawled === 1 ? 'page' : 'pages'}, ${totals.checked}/${totals.total} refs checked`
       : `Checking — ${totals.checked}/${totals.total}`
     : totals.total === 0
       ? 'Ready.'

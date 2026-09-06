@@ -69,6 +69,7 @@ export async function crawlSite(
       raw: p.raw,
       kind: p.kind,
       text: p.text,
+      anchorFound: p.anchorFound,
     }))
     hooks.onPage(next.url, refs)
 

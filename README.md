@@ -17,7 +17,7 @@ Everything runs locally in your browser. No account, no server, no telemetry, no
 |---|---|
 | **Checks every reference** | `<a href>`, `<area href>`, and optionally `<img src>`, `<script src>` and stylesheets |
 | **Sees the whole page** | Walks **shadow roots** and **same-origin iframes**, not just the top-level document — modern component-based sites hide most of their links in there |
-| **Resolves in-page anchors locally** | `href="#pricing"` with no `#pricing` on the page is reported as broken, with zero network requests |
+| **Resolves in-page anchors locally** | `href="#pricing"` with no `#pricing` on the page is reported as broken, with zero network requests — on the open page *and* on every page a crawl visits |
 | **Records the full redirect chain** | `301 → 302 → 301 → 200`, every hop and its status, plus **loop detection** — not just "it redirects" |
 | **Crawls the site** | Breadth-first from the current page, seeded by `sitemap.xml`, obeying `robots.txt`, with depth and page caps |
 | **Marks up the live page** | Colour-coded outlines and status-code badges, plus a draggable panel that jumps to any finding, cycles corners with one button and remembers where you put it |
@@ -86,7 +86,7 @@ Site crawl adds `crawler.ts` (BFS + `robots.txt` + `sitemap.xml`) which fetches 
 | `src/background/` | Service worker: scan orchestration, the checker, redirect tracking, the crawler. |
 | `src/content/` | Deep link collection, page highlighting, the floating panel. |
 | `src/popup/`, `src/report/`, `src/options/` | Extension UI. No frameworks, no jQuery. |
-| `tests/` | Vitest — 103 unit and DOM tests, run on Node 20 and 22 in CI. |
+| `tests/` | Vitest — 114 unit and DOM tests, run on Node 20 and 22 in CI. |
 | `e2e/` | Playwright — the extension running for real in Chromium. |
 
 ## Permissions, and why each one is needed

@@ -2,6 +2,7 @@ import type { CollectedRef } from '../core/messages.js'
 import type { ResourceKind } from '../core/types.js'
 import type { Settings } from '../core/settings.js'
 import { isInPageAnchor } from '../core/url.js'
+import { anchorExistsIn } from '../core/anchors.js'
 
 export const ID_ATTR = 'data-btc-id'
 
@@ -59,7 +60,7 @@ export function collectRefs(settings: Settings): CollectedRef[] {
           text: labelFor(el, target.kind),
           excludedBySelector: excluded.has(el) || undefined,
           anchorFound:
-            settings.checkAnchors && isInPageAnchor(raw) ? anchorExists(root, raw) : undefined,
+            settings.checkAnchors && isInPageAnchor(raw) ? anchorExistsIn(root, raw) : undefined,
         })
       }
     }
@@ -87,22 +88,6 @@ function sameOriginDocument(frame: HTMLIFrameElement): Document | null {
   } catch {
     return null
   }
-}
-
-function anchorExists(root: Document | ShadowRoot, raw: string): boolean {
-  const id = decodeURIComponent(raw.slice(1))
-  if (!id) return true
-  if (id.toLowerCase() === 'top') return true
-  const scope = root as ParentNode & { getElementById?: (v: string) => Element | null }
-  if (scope.getElementById?.(id)) return true
-
-  // Scanned rather than selected on purpose: ids containing a dot, colon or
-  // slash are perfectly legal in HTML but are not valid selector syntax, and
-  // CSS.escape is not available in every DOM implementation.
-  for (const el of Array.from(root.querySelectorAll('[id], [name]'))) {
-    if (el.getAttribute('id') === id || el.getAttribute('name') === id) return true
-  }
-  return false
 }
 
 function labelFor(el: Element, kind: ResourceKind): string {

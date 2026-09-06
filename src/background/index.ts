@@ -204,8 +204,19 @@ function decide(ref: CollectedRef, pageUrl: string, s: Session): Decision {
   }
   if (isInPageAnchor(ref.raw)) {
     const found = ref.anchorFound === true
+    // Normalised so that scanning a page and crawling the same page agree on the
+    // key, instead of filing the same anchor twice under two spellings of the URL.
+    const page = normalizeUrl(pageUrl) ?? pageUrl
+    const key = `anchor:${page}${ref.raw}`
+
+    // Undefined means nobody actually resolved this anchor — anchor checking is
+    // switched off, or it came from a source that could not answer. "We did not
+    // look" must never be reported as "this is broken".
+    if (ref.anchorFound === undefined) {
+      return { key, url: ref.raw, category: 'skipped', error: null }
+    }
     return {
-      key: `anchor:${pageUrl}${ref.raw}`,
+      key,
       url: ref.raw,
       category: found ? 'valid' : 'invalid',
       error: found ? null : 'No element on this page matches this anchor',

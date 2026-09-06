@@ -163,7 +163,8 @@ class Panel {
   setProgress(p: ScanProgress, done: boolean): void {
     const pct = p.totals.total === 0 ? 0 : Math.round((p.totals.checked / p.totals.total) * 100)
     ;(this.bar.firstElementChild as HTMLElement).style.width = `${pct}%`
-    const pages = p.mode === 'site' ? ` · ${p.pagesCrawled} pages` : ''
+    const pages =
+      p.mode === 'site' ? ` · ${p.pagesCrawled} ${p.pagesCrawled === 1 ? 'page' : 'pages'}` : ''
     this.title.textContent = done
       ? `Break the Chain — done (${p.totals.total} refs${pages})`
       : `Break the Chain — ${p.totals.checked}/${p.totals.total}${pages}`

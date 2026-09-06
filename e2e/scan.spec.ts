@@ -10,6 +10,7 @@ interface ScanRecord {
   url: string
   raw: string
   kind: string
+  foundOn: string
   category: string
   status: number | null
   redirects: { status: number; to: string }[]
@@ -43,7 +44,7 @@ test.afterAll(async () => {
   await closeServer?.()
 })
 
-test('scans a page and classifies every kind of link correctly', async () => {
+async function runScan(mode: 'page' | 'site') {
   const page = await context.newPage()
   await page.goto(`${origin}/`)
 
@@ -56,29 +57,40 @@ test('scans a page and classifies every kind of link correctly', async () => {
   const driver = await context.newPage()
   await driver.goto(`chrome-extension://${extensionId}/report/report.html`)
 
-  const records = (await driver.evaluate(async (id: number) => {
-    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
-    const state = async () =>
-      ((await chrome.runtime.sendMessage({ type: 'GET_STATE' })) as {
-        state: { running: boolean; results: unknown[] } | null
-      }).state
+  const records = (await driver.evaluate(
+    async ({ id, scanMode }: { id: number; scanMode: string }) => {
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+      const state = async () =>
+        ((await chrome.runtime.sendMessage({ type: 'GET_STATE' })) as {
+          state: { running: boolean; results: unknown[] } | null
+        }).state
 
-    // A just-installed service worker can still be starting up, in which case
-    // the first START_SCAN lands before its listener is registered and is
-    // silently dropped. Re-send until the scan is actually under way.
-    for (let attempt = 0; attempt < 5; attempt++) {
-      await chrome.runtime.sendMessage({ type: 'START_SCAN', mode: 'page', tabId: id }).catch(() => {})
-      for (let i = 0; i < 15; i++) {
-        await sleep(200)
-        const s = await state()
-        if (s && s.results.length > 0) {
-          for (let j = 0; j < 100 && (await state())!.running; j++) await sleep(200)
-          return (await state())!.results
+      // A just-installed service worker can still be starting up, in which case
+      // the first START_SCAN lands before its listener is registered and is
+      // silently dropped. Re-send until the scan is actually under way.
+      for (let attempt = 0; attempt < 5; attempt++) {
+        await chrome.runtime
+          .sendMessage({ type: 'START_SCAN', mode: scanMode, tabId: id })
+          .catch(() => {})
+        for (let i = 0; i < 15; i++) {
+          await sleep(200)
+          const s = await state()
+          if (s && s.results.length > 0) {
+            for (let j = 0; j < 150 && (await state())!.running; j++) await sleep(200)
+            return (await state())!.results
+          }
         }
       }
-    }
-    throw new Error('scan never started')
-  }, tabId)) as ScanRecord[]
+      throw new Error('scan never started')
+    },
+    { id: tabId, scanMode: mode },
+  )) as ScanRecord[]
+
+  return { page, driver, records }
+}
+
+test('scans a page and classifies every kind of link correctly', async () => {
+  const { page, records } = await runScan('page')
 
   const byRaw = (raw: string) => records.find((r) => r.raw === raw)
 
@@ -172,5 +184,41 @@ test('scans a page and classifies every kind of link correctly', async () => {
     const outlined = await page.locator('a[data-btc-cat="invalid"]').count()
     expect(outlined).toBeGreaterThan(0)
     await expect(page.locator('#break-the-chain-panel')).toHaveCount(1)
+  })
+})
+
+test('a site crawl resolves in-page anchors instead of calling them broken', async () => {
+  const { records } = await runScan('site')
+  const byRaw = (raw: string) => records.find((r) => r.raw === raw)
+
+  await test.step('the crawler visited more than the starting page', () => {
+    const pages = new Set(records.map((r) => r.foundOn))
+    expect(pages.size).toBeGreaterThan(1)
+  })
+
+  await test.step('anchors on a crawled page are resolved by the crawler itself', () => {
+    // These live on /ok, which the content script never touches — only the
+    // offscreen HTML parser can answer for them.
+    expect(byRaw('#second-anchor')).toMatchObject({ category: 'valid', foundOn: `${origin}/ok` })
+    expect(byRaw('#top')).toMatchObject({ category: 'valid' })
+    expect(byRaw('#not-here')?.category).toBe('invalid')
+  })
+
+  await test.step('anchors on the starting page still work', () => {
+    expect(byRaw('#real-anchor')?.category).toBe('valid')
+    expect(byRaw('#ghost')?.category).toBe('invalid')
+  })
+
+  await test.step('no anchor is reported broken without having been resolved', () => {
+    const deadOnPurpose = new Set(['#ghost', '#not-here'])
+    const wrong = records.filter(
+      (r) => r.raw.startsWith('#') && r.category === 'invalid' && !deadOnPurpose.has(r.raw),
+    )
+    expect(wrong.map((r) => r.raw)).toEqual([])
+  })
+
+  await test.step('the ordinary findings still hold during a crawl', () => {
+    expect(byRaw('/missing')).toMatchObject({ category: 'invalid', status: 404 })
+    expect(byRaw('/ok')).toMatchObject({ category: 'valid', status: 200 })
   })
 })

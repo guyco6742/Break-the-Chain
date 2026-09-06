@@ -30,7 +30,7 @@ async function load(): Promise<void> {
   $('empty').hidden = true
   const when = new Date(state.startedAt).toLocaleString()
   $('meta').textContent =
-    `${state.origin} · ${state.mode === 'site' ? `${state.pagesCrawled} pages crawled` : 'single page'} · ` +
+    `${state.origin} · ${state.mode === 'site' ? `${state.pagesCrawled} ${state.pagesCrawled === 1 ? 'page' : 'pages'} crawled` : 'single page'} · ` +
     `${state.totals.total} references · ${state.totals.invalid} broken · ${when}`
   render()
 }
