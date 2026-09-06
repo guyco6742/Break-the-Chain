@@ -26,6 +26,7 @@ Everything runs locally in your browser. No account, no server, no telemetry, no
 
 ### Design decisions worth knowing about
 
+- **Heading permalinks are understood.** GitHub, GitLab and most markdown renderers give a heading `id="user-content-slug"` while linking to `#slug`, and bridge the two in JavaScript. Checked literally, every heading permalink on GitHub is a dead anchor; that prefix is resolved, so they are not.
 - **`401` / `403` / `429` are warnings, not failures.** They usually mean the resource exists and is refusing an unauthenticated HEAD from an extension. Treating them as broken is the biggest source of false positives in link checkers.
 - **A 429 slows the scan down instead of failing the link.** When a host rate-limits us, every queued request for that host is held back for the `Retry-After` it asked for (capped at two minutes) and the URL gets one more try. Without that, a scan can get *your own IP* throttled by the site — and the link you were checking stops working in your browser too.
 - **Requests are disguised as navigations.** A `fetch()` from a service worker carries `Origin: chrome-extension://…` and `Sec-Fetch-Mode: cors`, which bot-protection layers in front of Etsy, Amazon and most Cloudflare/Akamai customers read and answer `403` — for URLs that load fine in a tab. `declarativeNetRequestWithHostAccess` rewrites those headers on the extension's own requests only (`tabIds: [-1]`), so nothing you browse is touched.
@@ -86,7 +87,7 @@ Site crawl adds `crawler.ts` (BFS + `robots.txt` + `sitemap.xml`) which fetches 
 | `src/background/` | Service worker: scan orchestration, the checker, redirect tracking, the crawler. |
 | `src/content/` | Deep link collection, page highlighting, the floating panel. |
 | `src/popup/`, `src/report/`, `src/options/` | Extension UI. No frameworks, no jQuery. |
-| `tests/` | Vitest — 114 unit and DOM tests, run on Node 20 and 22 in CI. |
+| `tests/` | Vitest — 117 unit and DOM tests, run on Node 20 and 22 in CI. |
 | `e2e/` | Playwright — the extension running for real in Chromium. |
 
 ## Permissions, and why each one is needed

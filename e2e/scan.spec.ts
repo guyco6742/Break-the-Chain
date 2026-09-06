@@ -119,6 +119,11 @@ test('scans a page and classifies every kind of link correctly', async () => {
     expect(byRaw('#ghost')).toMatchObject({ category: 'invalid' })
   })
 
+  await test.step('a markdown-renderer heading permalink is not a dead anchor', () => {
+    // GitHub emits id="user-content-x" and links to "#x"; both must resolve.
+    expect(byRaw('#rendered-heading')).toMatchObject({ category: 'valid' })
+  })
+
   await test.step('an empty href is flagged, and mailto: is skipped', () => {
     expect(byRaw('')?.category).toBe('empty')
     expect(records.find((r) => r.raw.startsWith('mailto:'))?.category).toBe('skipped')

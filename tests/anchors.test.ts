@@ -25,6 +25,23 @@ describe('anchorId', () => {
   })
 })
 
+describe('anchorExistsIn — markdown-renderer permalinks', () => {
+  it('accepts a GitHub-style heading permalink', () => {
+    // This is what GitHub actually emits for "## What it does".
+    document.body.innerHTML =
+      '<h2><a id="user-content-what-it-does" class="anchor" href="#what-it-does"></a>What it does</h2>'
+    expect(anchorExistsIn(document, '#what-it-does')).toBe(true)
+  })
+  it('still rejects a permalink whose target really is absent', () => {
+    document.body.innerHTML = '<h2><a id="user-content-intro"></a>Intro</h2>'
+    expect(anchorExistsIn(document, '#outro')).toBe(false)
+  })
+  it('does not let the prefix create false matches in reverse', () => {
+    document.body.innerHTML = '<div id="intro"></div>'
+    expect(anchorExistsIn(document, '#user-content-intro')).toBe(false)
+  })
+})
+
 describe('anchorExistsIn', () => {
   it('finds an element by id', () => {
     document.body.innerHTML = '<h2 id="pricing">x</h2>'

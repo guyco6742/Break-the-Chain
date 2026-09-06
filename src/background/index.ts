@@ -219,7 +219,9 @@ function decide(ref: CollectedRef, pageUrl: string, s: Session): Decision {
       key,
       url: ref.raw,
       category: found ? 'valid' : 'invalid',
-      error: found ? null : 'No element on this page matches this anchor',
+      error: found
+        ? null
+        : 'Nothing on this page has this id. Pages that build their anchor targets in JavaScript after load can report this even when the jump works.',
     }
   }
   if (isUncheckableScheme(ref.raw)) {
