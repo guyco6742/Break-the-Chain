@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Break the Chain — settings</title>
+    <link rel="stylesheet" href="./options.css" />
+  </head>
+  <body>
+    <h1>Break the Chain settings</h1>
+
+    <section>
+      <h2>What to check</h2>
+      <label class="check"><input type="checkbox" data-key="checkImages" /> Images (<code>img[src]</code>)</label>
+      <label class="check"><input type="checkbox" data-key="checkScripts" /> Scripts (<code>script[src]</code>)</label>
+      <label class="check"><input type="checkbox" data-key="checkStylesheets" /> Stylesheets</label>
+      <label class="check"><input type="checkbox" data-key="checkAnchors" /> In-page anchors (<code>#section</code>)</label>
+      <label class="check"><input type="checkbox" data-key="includeEmpty" /> Report empty <code>href</code> / <code>href="#"</code></label>
+      <label class="check"><input type="checkbox" data-key="deepScan" /> Look inside shadow DOM and same-origin iframes</label>
+    </section>
+
+    <section>
+      <h2>Speed &amp; politeness</h2>
+      <label class="field">Parallel requests<input type="number" min="1" max="32" data-key="concurrency" /></label>
+      <label class="field">Parallel per host<input type="number" min="1" max="16" data-key="perHostConcurrency" /></label>
+      <label class="field">Timeout (ms)<input type="number" min="1000" max="60000" step="500" data-key="timeoutMs" /></label>
+      <label class="field">Retries<input type="number" min="0" max="5" data-key="retries" /></label>
+      <label class="field">Delay per host (ms)<input type="number" min="0" max="5000" step="50" data-key="hostDelayMs" /></label>
+    </section>
+
+    <section>
+      <h2>Site crawl</h2>
+      <label class="field">Max depth<input type="number" min="0" max="10" data-key="maxDepth" /></label>
+      <label class="field">Max pages<input type="number" min="1" max="1000" data-key="maxPages" /></label>
+      <label class="check"><input type="checkbox" data-key="respectRobots" /> Respect <code>robots.txt</code></label>
+      <label class="check"><input type="checkbox" data-key="useSitemap" /> Seed from <code>sitemap.xml</code></label>
+    </section>
+
+    <section>
+      <h2>Exclusions</h2>
+      <label class="area">
+        URL patterns — one per line. <code>facebook.com</code> matches a substring,
+        <code>*/wp-admin*</code> is a wildcard, <code>/\.pdf$/i</code> is a regex.
+        <textarea data-key="excludePatterns" rows="5" spellcheck="false"></textarea>
+      </label>
+      <label class="area">
+        CSS selectors to skip — one per line, e.g. <code>header</code>, <code>footer</code>, <code>nav.site-menu</code>.
+        <textarea data-key="excludeSelectors" rows="3" spellcheck="false"></textarea>
+      </label>
+    </section>
+
+    <section>
+      <h2>Appearance</h2>
+      <div class="colors">
+        <label class="color">Valid<input type="color" data-color="valid" /></label>
+        <label class="color">Redirect<input type="color" data-color="redirect" /></label>
+        <label class="color">Warning<input type="color" data-color="warning" /></label>
+        <label class="color">Broken<input type="color" data-color="invalid" /></label>
+        <label class="color">Excluded<input type="color" data-color="excluded" /></label>
+      </div>
+      <label class="check"><input type="checkbox" data-key="showBadges" /> Show status-code badges next to links</label>
+      <p class="hint">The panel remembers wherever you drag it. Use the ⤡ button in its header to jump between corners, or reset it here.</p>
+      <label class="field">Panel corner
+        <select data-key="panelCorner">
+          <option value="top-right">top right</option>
+          <option value="top-left">top left</option>
+          <option value="bottom-right">bottom right</option>
+          <option value="bottom-left">bottom left</option>
+        </select>
+      </label>
+    </section>
+
+    <footer>
+      <button id="reset-panel">Reset panel position</button>
+      <button id="reset">Reset to defaults</button>
+      <span id="saved" class="saved"></span>
+    </footer>
+
+    <script type="module" src="./options.ts"></script>
+  </body>
+</html>

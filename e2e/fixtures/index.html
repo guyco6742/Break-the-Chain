@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Fixture</title></head>
+  <body>
+    <h2 id="real-anchor">Anchor target</h2>
+
+    <a href="/ok">good link</a>
+    <a href="/missing">broken link</a>
+    <a href="/server-error">server error</a>
+    <a href="/hop1">redirect chain</a>
+    <a href="/rate-limited">rate limited once</a>
+    <a href="#real-anchor">good anchor</a>
+    <a href="#ghost">dead anchor</a>
+    <a href="">empty href</a>
+    <a href="mailto:someone@example.com">mail</a>
+    <a href="/ok">duplicate of the good link</a>
+    <img src="/missing.png" alt="broken image" />
+
+    <footer><a href="/missing">excluded footer link</a></footer>
+
+    <div id="host"></div>
+    <script>
+      document.getElementById('host').attachShadow({ mode: 'open' }).innerHTML =
+        '<a href="/shadow-missing">link inside shadow dom</a>'
+    </script>
+  </body>
+</html>

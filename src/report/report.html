@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Break the Chain — report</title>
+    <link rel="stylesheet" href="./report.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Link report</h1>
+        <p id="meta" class="meta"></p>
+      </div>
+      <div class="actions">
+        <button id="csv">Export CSV</button>
+        <button id="json">Export JSON</button>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div id="chips" class="chips"></div>
+      <input id="search" type="search" placeholder="Filter by URL, text or status…" />
+      <label class="check"><input id="only-hops" type="checkbox" /> redirect chains only</label>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th data-sort="status" class="w-status">Status</th>
+          <th data-sort="url">URL</th>
+          <th data-sort="text">Text</th>
+          <th data-sort="kind" class="w-kind">Kind</th>
+          <th data-sort="occurrences" class="w-num">×</th>
+          <th data-sort="durationMs" class="w-num">ms</th>
+          <th data-sort="foundOn">Found on</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p id="empty" class="empty">No scan data yet — run a scan from the toolbar button first.</p>
+
+    <script type="module" src="./report.ts"></script>
+  </body>
+</html>
