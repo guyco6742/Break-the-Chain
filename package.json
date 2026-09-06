@@ -1,6 +1,6 @@
 {
   "name": "break-the-chain",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "A Chrome (MV3) extension that finds broken links, dead anchors and redirect chains on any page — or across a whole site.",
   "private": true,
   "type": "module",
@@ -33,7 +33,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "zip": "npm run build && cd dist && zip -r ../break-the-chain.zip . -x '.*'",
+    "zip": "npm run build && node scripts/zip.mjs",
     "screenshots": "npm run build && node scripts/screenshots.mjs",
     "test:e2e": "playwright test"
   },

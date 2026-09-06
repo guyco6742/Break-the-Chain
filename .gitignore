@@ -1,6 +1,7 @@
 node_modules/
 dist/
 *.zip
+break-the-chain-v*.zip
 .DS_Store
 coverage/
 .dist-e2e/

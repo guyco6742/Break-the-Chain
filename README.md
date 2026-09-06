@@ -54,7 +54,7 @@ npm run dev        # rebuild on change
 npm run typecheck  # tsc --noEmit
 npm test           # unit + DOM tests (vitest, happy-dom)
 npm run test:e2e   # loads the built extension in Chromium and scans a fixture site
-npm run zip        # build + package for the Chrome Web Store
+npm run zip        # build + package for the Chrome Web Store (Windows, macOS, Linux)
 ```
 
 `npm run test:e2e` spins up a local fixture server containing one of every failure mode — a 200, a 404, a 500, a three-hop redirect chain, a dead anchor, an empty `href`, a broken image and a link buried in a shadow root — loads the real built extension into Chromium, runs a real scan and asserts on the real results. Set `CHROMIUM_PATH` to use a preinstalled browser instead of Playwright's download.

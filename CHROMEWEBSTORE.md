@@ -122,7 +122,7 @@ Screenshots worth taking: a page mid-scan with links coloured and the panel show
 - [x] No remote code
 - [x] Service worker keeps no state that is lost when it is torn down
 - [x] `description` within 132 characters
-- [x] ZIP contains `manifest.json` at the root, and only `dist/`
+- [x] ZIP contains `manifest.json` at the root, and only `dist/` — produced by `npm run zip`, which works on Windows too
 - [x] Privacy policy published at `docs/privacy.html` — GitHub Pages: Settings → Pages → Source **Deploy from a branch** → branch `main`, folder `/docs`. `docs/.nojekyll` keeps Pages from running the files through Jekyll.
 - [x] Screenshots and promo tile produced
 - [ ] Version bumped and `dist/` rebuilt (the e2e suite fails if `dist` is stale)
