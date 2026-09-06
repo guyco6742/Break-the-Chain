@@ -1,6 +1,6 @@
 import type { LinkRecord, LinkCategory, ScanState } from '../core/types.js'
 import { toCsv, toJson, suggestFilename } from '../core/exporter.js'
-import { statusLabel } from '../core/classify.js'
+import { statusChip, statusLabel } from '../core/classify.js'
 import { DEFAULT_SETTINGS } from '../core/settings.js'
 
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T
@@ -72,7 +72,7 @@ function render(): void {
     const code = document.createElement('span')
     code.className = 'code'
     code.style.background = COLORS[r.category]
-    code.textContent = r.status !== null ? String(r.status) : r.category === 'empty' ? '—' : 'ERR'
+    code.textContent = statusChip(r.status, r.category)
     code.title = statusLabel(r.status, r.category)
     status.appendChild(code)
 

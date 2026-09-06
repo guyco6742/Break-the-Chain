@@ -8,8 +8,7 @@ A Chrome extension (Manifest V3) that finds **broken links, dead in-page anchors
 
 Everything runs locally in your browser. No account, no server, no telemetry, nothing to pay for.
 
-<!-- Replace with a real screen recording before publishing. -->
-<!-- ![demo](docs/demo.gif) -->
+![Break the Chain scanning a documentation page: links outlined in green, blue and red with their status codes, and a panel listing the failures](docs/screenshot.png)
 
 ## What it does
 

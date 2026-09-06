@@ -1,5 +1,7 @@
 # Privacy Policy — Break the Chain
 
+> Published at <https://guyco6742.github.io/Break-the-Chain/privacy.html> (source: `docs/privacy.html`).
+
 **Last updated: 6 September 2026**
 
 ## The short version

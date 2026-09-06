@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { classifyStatus, isBroken, statusLabel, statusNote } from '../src/core/classify.js'
+import { classifyStatus, isBroken, statusLabel, statusNote, statusChip } from '../src/core/classify.js'
 
 describe('classifyStatus', () => {
   it('maps 2xx to valid', () => {
@@ -57,5 +57,27 @@ describe('note wording matches the settings UI', () => {
     for (const label of ['Parallel per host', 'Delay per host (ms)', 'Speed &amp; politeness', 'Exclusions']) {
       expect(html).toContain(label)
     }
+  })
+})
+
+describe('statusChip', () => {
+  it('shows the HTTP status when there is one', () => {
+    expect(statusChip(404, 'invalid')).toBe('404')
+    expect(statusChip(200, 'valid')).toBe('200')
+  })
+  it('never labels a healthy result ERR', () => {
+    // A working "#section" link has no HTTP status; it used to render as ERR
+    // on a green chip.
+    expect(statusChip(null, 'valid')).toBe('OK')
+  })
+  it('labels the statusless categories in their own terms', () => {
+    expect(statusChip(null, 'empty')).toBe('—')
+    expect(statusChip(null, 'skipped')).toBe('SKIP')
+    expect(statusChip(null, 'excluded')).toBe('EXCL')
+    expect(statusChip(null, 'pending')).toBe('…')
+  })
+  it('keeps ERR for a real failure with no status', () => {
+    expect(statusChip(null, 'invalid')).toBe('ERR')
+    expect(statusChip(null, 'warning')).toBe('ERR')
   })
 })

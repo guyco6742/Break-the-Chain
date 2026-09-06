@@ -1,5 +1,6 @@
 import { loadSettings, saveSettings, DEFAULT_SETTINGS, type Settings } from '../core/settings.js'
 import type { LinkRecord, LinkCategory } from '../core/types.js'
+import { statusChip } from '../core/classify.js'
 import type { ScanProgress, ToContent } from '../core/messages.js'
 import { collectRefs, findElements, ID_ATTR } from './collect.js'
 import { PANEL_CSS, pageCss } from './panel-css.js'
@@ -15,6 +16,14 @@ const VISIBLE: LinkCategory[] = ['invalid', 'warning', 'redirect', 'empty', 'val
 let settings: Settings = DEFAULT_SETTINGS
 const records = new Map<string, LinkRecord>()
 let filter: LinkCategory | 'all' = 'invalid'
+/** Built once per scan, so painting a result never re-walks the document. */
+let elementIndex = new Map<string, Element>()
+/**
+ * record id -> the element ids it was found on. Needed because a record's id is
+ * a normalised URL, not a DOM id: clicking a row in the panel used to fall back
+ * to a querySelector on the raw href every single time.
+ */
+const recordElements = new Map<string, string[]>()
 let panel: Panel | null = null
 
 if (!window.__btcInjected) {
@@ -30,21 +39,30 @@ async function handle(msg: ToContent): Promise<void> {
     case 'SCAN_STARTED':
       settings = await loadSettings()
       records.clear()
+      recordElements.clear()
       injectPageCss()
       panel ??= new Panel()
       panel.reset()
       break
     case 'COLLECT': {
       settings = await loadSettings()
-      const refs = collectRefs(settings)
-      await chrome.runtime.sendMessage({ type: 'PAGE_REFS', refs, pageUrl: location.href })
+      const collected = await collectRefs(settings)
+      elementIndex = collected.elements
+      await chrome.runtime.sendMessage({
+        type: 'PAGE_REFS',
+        refs: collected.refs,
+        pageUrl: location.href,
+      })
       break
     }
-    case 'RESULT':
+    case 'RESULT': {
       records.set(msg.record.id, msg.record)
+      const known = recordElements.get(msg.record.id) ?? []
+      recordElements.set(msg.record.id, [...new Set([...known, ...msg.elementIds])])
       paint(msg.record, msg.elementIds)
       panel?.render()
       break
+    }
     case 'PROGRESS':
     case 'SCAN_DONE':
       panel?.setProgress(msg.progress, msg.type === 'SCAN_DONE')
@@ -57,12 +75,23 @@ async function handle(msg: ToContent): Promise<void> {
 
 function paint(record: LinkRecord, elementIds: string[]): void {
   if (record.category === 'skipped') return
-  for (const el of findElements(elementIds)) {
+  for (const el of elementsFor(elementIds)) {
     el.setAttribute('data-btc-cat', record.category)
-    if (record.status !== null) el.setAttribute('data-btc-status', String(record.status))
-    else if (record.category === 'empty') el.setAttribute('data-btc-status', 'empty')
-    else if (record.error) el.setAttribute('data-btc-status', 'ERR')
+    el.setAttribute('data-btc-status', statusChip(record.status, record.category))
   }
+}
+
+/** Map lookup first; only ids the map has lost fall back to walking the DOM. */
+function elementsFor(ids: string[]): Element[] {
+  const found: Element[] = []
+  const missing: string[] = []
+  for (const id of ids) {
+    const el = elementIndex.get(id)
+    if (el?.isConnected) found.push(el)
+    else missing.push(id)
+  }
+  if (missing.length > 0) found.push(...findElements(missing))
+  return found
 }
 
 function injectPageCss(): void {
@@ -78,6 +107,8 @@ function clearAll(): void {
   document.getElementById(HOST_ID)?.remove()
   panel = null
   records.clear()
+  recordElements.clear()
+  elementIndex = new Map()
   for (const el of Array.from(document.querySelectorAll(`[${ID_ATTR}]`))) {
     el.removeAttribute(ID_ATTR)
     el.removeAttribute('data-btc-cat')
@@ -209,7 +240,7 @@ class Panel {
     const code = document.createElement('span')
     code.className = 'code'
     code.style.background = this.colorFor(r.category)
-    code.textContent = r.status !== null ? String(r.status) : r.category === 'empty' ? 'empty' : 'ERR'
+    code.textContent = statusChip(r.status, r.category)
     const txt = document.createElement('span')
     txt.className = 'txt'
     txt.textContent = r.text || r.raw || r.url
@@ -225,7 +256,7 @@ class Panel {
   }
 
   private reveal(r: LinkRecord): void {
-    const el = findElements([r.id]).at(0) ?? this.elementForRecord(r)
+    const el = elementsFor(recordElements.get(r.id) ?? []).at(0) ?? this.elementForRecord(r)
     if (!el) return
     el.scrollIntoView({ behavior: 'smooth', block: 'center' })
     el.setAttribute('data-btc-flash', '1')

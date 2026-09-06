@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy Policy — Break the Chain</title>
+<style>
+  :root{color-scheme:light dark;--bg:#ffffff;--fg:#1f2430;--muted:#5b6478;--line:#e6e8ee;--accent:#c2740f;--card:#f7f8fa}
+  @media (prefers-color-scheme:dark){:root{--bg:#0f1219;--fg:#e7eaf0;--muted:#8a94a6;--line:#1e2430;--accent:#f0a24a;--card:#12151c}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:16px/1.7 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:48px 24px 80px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+  .mark{display:flex;gap:6px}
+  .mark i{width:26px;height:16px;border-radius:8px;display:block}
+  .mark .a{border:3px solid #4ac97e}.mark .b{border:3px solid #e84d4d}
+  h1{font-size:30px;margin:18px 0 4px;letter-spacing:-.4px}
+  h2{font-size:18px;margin:34px 0 6px}
+  p,li{color:var(--fg)}
+  .lead{color:var(--muted);margin:0 0 6px}
+  .date{color:var(--muted);font-size:14px;margin:0 0 26px}
+  a{color:var(--accent)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:22px 0}
+  .box p{margin:0}
+  ul{padding-inline-start:22px}
+  footer{border-top:1px solid var(--line);margin-top:44px;padding-top:18px;color:var(--muted);font-size:14px}
+  code{background:var(--card);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><span class="mark"><i class="a"></i><i class="b"></i></span><strong>Break the Chain</strong></header>
+<h1>Privacy Policy</h1>
+<p class="date">Last updated: 6 September 2026</p>
+
+<div class="box">
+  <p><strong>Break the Chain does not collect, store, transmit or sell any of your data.</strong>
+  There is no server, no account, no analytics and no telemetry. Nothing you do with this
+  extension is visible to its author or to anyone else.</p>
+</div>
+
+<h2>What the extension does with your browsing</h2>
+<p>
+  When you click <strong>Scan this page</strong>, the extension reads the links on that page and
+  sends an HTTP request to each one, directly from your browser, to find out whether it still
+  works. This is the same thing that would happen if you clicked every link yourself, and it is
+  the entire purpose of the extension.
+</p>
+<p>
+  Those requests go only to the sites the links point at. They do not pass through any server
+  belonging to the author. The extension is not told which sites you visit, and has no way to
+  report them anywhere.
+</p>
+<p>
+  Requests are sent with your browser's existing cookies, so that a link only you can see is
+  checked as <em>you</em> rather than as a stranger. Those cookies never leave your browser and
+  are never read by the extension.
+</p>
+
+<h2>What is stored, and where</h2>
+<p>Two things are stored locally in your own browser:</p>
+<ul>
+  <li><strong>Your settings</strong> — which resource types to check, exclusion rules, colours,
+    speed limits — in <code>chrome.storage.sync</code>. If you have Chrome Sync switched on,
+    Chrome may sync these settings between your own devices, the same way it syncs your
+    bookmarks. That is between you and Chrome; the extension is not part of it.</li>
+  <li><strong>The results of your last scan</strong> — in <code>chrome.storage.session</code>,
+    temporary storage that Chrome clears when you close the browser.</li>
+</ul>
+<p>Both are readable only by this extension, on your machine. Neither is ever uploaded.</p>
+
+<h2>Permissions</h2>
+<p>
+  The extension asks for permission to send requests to any site (<code>&lt;all_urls&gt;</code>),
+  because the links on a page can point anywhere and there is no way to know where in advance.
+  This permission is <strong>optional</strong>: installing the extension does not grant it. It is
+  requested from a button in the extension's popup the first time you run a scan, and you can
+  withdraw it at any time from Chrome's extension settings.
+</p>
+
+<h2>Changes</h2>
+<p>
+  Any future version that changes what is described here will update this page and say so in the
+  release notes.
+</p>
+
+<h2>Contact</h2>
+<p>
+  Questions or concerns:
+  <a href="https://github.com/guyco6742/Break-the-Chain/issues">open an issue on GitHub</a>.
+</p>
+
+<footer>
+  <a href="./">Break the Chain</a> · open source under the MIT licence ·
+  <a href="https://github.com/guyco6742/Break-the-Chain">source code</a>
+</footer>
+</div>
+</body>
+</html>

@@ -55,3 +55,23 @@ export function statusNote(status: number | null, finalUrl: string | null): stri
   if (status === 999) return `Non-standard block status returned by ${finalUrl ?? 'the site'} (LinkedIn does this).`
   return null
 }
+
+/**
+ * The short label on a result chip.
+ *
+ * Anchors, skipped schemes and empty hrefs never have an HTTP status, so
+ * falling back to "ERR" whenever `status` is null puts the word ERR on a green
+ * chip for a perfectly valid `#section` link. The label follows the category
+ * instead, and only real failures say ERR.
+ */
+export function statusChip(status: number | null, category: LinkCategory): string {
+  if (status !== null) return String(status)
+  switch (category) {
+    case 'valid': return 'OK'
+    case 'empty': return '—'
+    case 'skipped': return 'SKIP'
+    case 'excluded': return 'EXCL'
+    case 'pending': return '…'
+    default: return 'ERR'
+  }
+}

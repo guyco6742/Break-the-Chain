@@ -1,7 +1,7 @@
 # Chrome Web Store — Break the Chain
 
 Single source of truth for the store listing. Copy-paste from here into the
-Developer Dashboard. **Last updated: 2026-09-06 — v1.0.9**
+Developer Dashboard. **Last updated: 2026-09-06 — v1.0.10**
 
 > Exclude this file from the upload ZIP. `npm run zip` packages `dist/` only, so it already is.
 
@@ -42,7 +42,7 @@ Developer Dashboard. **Last updated: 2026-09-06 — v1.0.9**
 > Results export to CSV and JSON. Free and open source (MIT).
 
 **Homepage / support URL:** https://github.com/guyco6742/Break-the-Chain
-**Privacy policy URL:** _(see PRIVACY.md — must be live before submission)_
+**Privacy policy URL:** https://guyco6742.github.io/Break-the-Chain/privacy.html
 
 ---
 
@@ -104,9 +104,11 @@ Certify in the dashboard's data-use form:
 | Asset | Size | Status |
 |---|---|---|
 | Store icon | 128×128 | ✅ `public/icons/128.png` |
-| Screenshots | 1280×800, 1–5 | ⬜ **to do** |
-| Small promo tile | 440×280 | ⬜ **to do** |
-| Marquee promo tile | 1400×560 | optional |
+| Screenshots | 1280×800, 1–5 | ✅ `store-assets/screenshot-1-scan.png`, `-2-report.png`, `-3-settings.png` |
+| Small promo tile | 440×280 | ✅ `store-assets/promo-small-440x280.png` |
+| Marquee promo tile | 1400×560 | ✅ `store-assets/promo-marquee-1400x560.png` |
+
+Regenerate any of them with `npm run screenshots` — it drives the real built extension against a demo site, so they can never drift from what the extension actually looks like.
 
 Screenshots worth taking: a page mid-scan with links coloured and the panel showing failures; the full report with a redirect chain expanded; the options page.
 
@@ -121,8 +123,8 @@ Screenshots worth taking: a page mid-scan with links coloured and the panel show
 - [x] Service worker keeps no state that is lost when it is torn down
 - [x] `description` within 132 characters
 - [x] ZIP contains `manifest.json` at the root, and only `dist/`
-- [ ] Privacy policy URL live and matching the data-use answers
-- [ ] Screenshots and promo tile produced
+- [x] Privacy policy published at `docs/privacy.html` (GitHub Pages must be switched on: Settings → Pages → Source: `main` / `docs`)
+- [x] Screenshots and promo tile produced
 - [ ] Version bumped and `dist/` rebuilt (the e2e suite fails if `dist` is stale)
 
 ---
@@ -131,6 +133,7 @@ Screenshots worth taking: a page mid-scan with links coloured and the panel show
 
 | Version | Date | Change |
 |---|---|---|
+| 1.0.10 | 2026-09-06 | Result chips label statusless results correctly (a working `#anchor` said ERR on a green chip); store assets generated |
 | 1.0.9 | 2026-09-06 | Scan state survives a service-worker restart; the scanned URL is passed from the popup instead of read from the tabs API |
 | 1.0.8 | 2026-09-06 | Removed modulepreload tags from extension pages; e2e guard against a stale `dist` |
 | 1.0.7 | 2026-09-06 | Resolve `user-content-` heading permalinks (GitHub, GitLab, markdown renderers) |

@@ -13,7 +13,7 @@ export const PANEL_CSS = `
   box-shadow: 0 12px 40px rgba(0,0,0,.45); font-size: 13px; line-height: 1.45;
 }
 .hdr { display: flex; align-items: center; gap: 8px; padding: 9px 10px; background: #171b24; cursor: move; user-select: none; }
-.hdr .name { font-weight: 650; letter-spacing: .2px; flex: 1; }
+.hdr .name { font-weight: 650; letter-spacing: .2px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hdr button { background: none; border: 0; color: var(--accent); cursor: pointer; font-size: 15px; padding: 2px 5px; border-radius: 5px; }
 .hdr button:hover { background: #232936; color: #fff; }
 .hdr button.corner { font-size: 17px; line-height: 1; }

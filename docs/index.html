@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Break the Chain — broken link checker for Chrome</title>
+<meta name="description" content="A Chrome extension that finds broken links, dead in-page anchors and redirect chains on any page, or across a whole site. Runs entirely in your browser.">
+<style>
+  :root{color-scheme:light dark;--bg:#ffffff;--fg:#1f2430;--muted:#5b6478;--line:#e6e8ee;--accent:#c2740f;--card:#f7f8fa}
+  @media (prefers-color-scheme:dark){:root{--bg:#0f1219;--fg:#e7eaf0;--muted:#8a94a6;--line:#1e2430;--accent:#f0a24a;--card:#12151c}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:16px/1.7 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:48px 24px 80px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+  .mark{display:flex;gap:6px}
+  .mark i{width:26px;height:16px;border-radius:8px;display:block}
+  .mark .a{border:3px solid #4ac97e}.mark .b{border:3px solid #e84d4d}
+  h1{font-size:30px;margin:18px 0 4px;letter-spacing:-.4px}
+  h2{font-size:18px;margin:34px 0 6px}
+  p,li{color:var(--fg)}
+  .lead{color:var(--muted);margin:0 0 6px}
+  .date{color:var(--muted);font-size:14px;margin:0 0 26px}
+  a{color:var(--accent)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:22px 0}
+  .box p{margin:0}
+  ul{padding-inline-start:22px}
+  footer{border-top:1px solid var(--line);margin-top:44px;padding-top:18px;color:var(--muted);font-size:14px}
+  code{background:var(--card);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><span class="mark"><i class="a"></i><i class="b"></i></span><strong>Break the Chain</strong></header>
+<h1>Break the Chain</h1>
+<p class="lead">
+  A Chrome extension that finds broken links, dead in-page anchors and redirect chains
+  on any page — or across a whole site.
+</p>
+<p class="date">Everything runs in your browser. No account, no server, nothing to pay for.</p>
+
+<p><img src="./screenshot.png" alt="Break the Chain scanning a documentation page: links outlined in green, blue and red with their status codes, and a panel listing the failures" style="max-width:100%;border-radius:10px;border:1px solid var(--line)"></p>
+
+<h2>What it finds</h2>
+<ul>
+  <li>Broken links — 404s, server errors, hosts that no longer resolve</li>
+  <li>Dead in-page anchors — a "jump to pricing" link with no pricing section left to jump to</li>
+  <li>Redirect chains — every hop and its status code, including loops</li>
+  <li>Broken images, and optionally scripts and stylesheets</li>
+  <li>Empty links left behind by a template</li>
+</ul>
+
+<h2>Links</h2>
+<ul>
+  <li><a href="https://github.com/guyco6742/Break-the-Chain">Source code on GitHub</a></li>
+  <li><a href="./privacy.html">Privacy policy</a></li>
+  <li><a href="https://github.com/guyco6742/Break-the-Chain/releases">Releases</a></li>
+</ul>
+
+<footer>MIT licensed · built by Guy Cohen</footer>
+</div>
+</body>
+</html>
