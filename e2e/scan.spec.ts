@@ -227,3 +227,39 @@ test('a site crawl resolves in-page anchors instead of calling them broken', asy
     expect(byRaw('/ok')).toMatchObject({ category: 'valid', status: 200 })
   })
 })
+
+test('the built pages carry no modulepreload tags', async () => {
+  // Vite emits <link rel="modulepreload"> for shared chunks. On an extension
+  // origin those preloads are never used, and Chrome files two warnings per tag
+  // in the DevTools Issues panel — which the console listener below cannot see,
+  // so this is checked against the build output itself.
+  const { readFileSync, readdirSync } = await import('node:fs')
+  const { join } = await import('node:path')
+
+  const pages = ['popup/popup.html', 'report/report.html', 'options/options.html', 'offscreen/offscreen.html']
+  for (const page of pages) {
+    const html = readFileSync(join(root, 'dist', page), 'utf8')
+    expect(html, `${page} should not preload chunks`).not.toContain('modulepreload')
+  }
+  // The polyfill chunk only exists to serve those tags.
+  const chunks = readdirSync(join(root, 'dist', 'chunks'))
+  expect(chunks.filter((f) => f.includes('modulepreload'))).toEqual([])
+})
+
+test('the extension pages load without console errors', async () => {
+  const noise: string[] = []
+
+  for (const path of ['popup/popup.html', 'report/report.html', 'options/options.html']) {
+    const page = await context.newPage()
+    page.on('console', (message) => {
+      if (message.type() === 'error') noise.push(`${path}: [error] ${message.text()}`)
+    })
+    page.on('pageerror', (error) => noise.push(`${path}: [pageerror] ${error.message}`))
+    await page.goto(`chrome-extension://${extensionId}/${path}`)
+    await page.waitForLoadState('load')
+    await page.waitForTimeout(500)
+    await page.close()
+  }
+
+  expect(noise).toEqual([])
+})

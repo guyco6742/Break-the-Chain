@@ -88,7 +88,7 @@ Site crawl adds `crawler.ts` (BFS + `robots.txt` + `sitemap.xml`) which fetches 
 | `src/content/` | Deep link collection, page highlighting, the floating panel. |
 | `src/popup/`, `src/report/`, `src/options/` | Extension UI. No frameworks, no jQuery. |
 | `tests/` | Vitest — 117 unit and DOM tests, run on Node 20 and 22 in CI. |
-| `e2e/` | Playwright — the extension running for real in Chromium. |
+| `e2e/` | Playwright — the extension running for real in Chromium: a page scan, a site crawl, a clean build output and a clean console. |
 
 ## Permissions, and why each one is needed
 

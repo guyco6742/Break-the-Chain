@@ -15,6 +15,11 @@ export default defineConfig({
     emptyOutDir: true,
     target: 'chrome110',
     minify: false,
+    // Extension pages load every file from disk, so <link rel="modulepreload">
+    // buys nothing — and Chrome logs two warnings per tag on an extension
+    // origin ("cross-world extension resource mismatch", "preloaded but not
+    // used"). Off, the console stays clean and the polyfill chunk disappears.
+    modulePreload: false,
     rollupOptions: {
       input: {
         background: resolve(__dirname, 'src/background/index.ts'),
