@@ -6,3 +6,7 @@ coverage/
 .dist-e2e/
 test-results/
 playwright-report/
+
+# Local scratch
+Claude outputs/
+*.tar.gz

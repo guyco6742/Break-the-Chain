@@ -1,11 +1,32 @@
 {
   "name": "break-the-chain",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A Chrome (MV3) extension that finds broken links, dead anchors and redirect chains on any page — or across a whole site.",
   "private": true,
   "type": "module",
   "license": "MIT",
   "author": "Guy Cohen",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guyco6742/Break-the-Chain.git"
+  },
+  "bugs": {
+    "url": "https://github.com/guyco6742/Break-the-Chain/issues"
+  },
+  "homepage": "https://github.com/guyco6742/Break-the-Chain#readme",
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "chrome-extension",
+    "manifest-v3",
+    "broken-links",
+    "link-checker",
+    "seo",
+    "redirect-chain",
+    "crawler",
+    "typescript"
+  ],
   "scripts": {
     "dev": "vite build --watch",
     "build": "tsc --noEmit && vite build && vite build --config vite.content.config.ts",
@@ -19,7 +40,7 @@
     "@playwright/test": "^1.63.0",
     "@types/chrome": "^0.0.287",
     "@types/node": "^26.4.1",
-    "jsdom": "^30.0.1",
+    "happy-dom": "^20.14.0",
     "typescript": "^5.6.3",
     "vite": "^5.4.11",
     "vitest": "^2.1.8"

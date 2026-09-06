@@ -232,7 +232,12 @@ class Panel {
   }
 
   private elementForRecord(r: LinkRecord): Element | null {
-    return document.querySelector(`[href="${CSS.escape(r.raw)}"], [src="${CSS.escape(r.raw)}"]`)
+    const value = r.raw.replace(/["\\]/g, '\\$&')
+    try {
+      return document.querySelector(`[href="${value}"], [src="${value}"]`)
+    } catch {
+      return null
+    }
   }
 
   private chip(value: LinkCategory | 'all', label: string, count: number, color: string): HTMLElement {

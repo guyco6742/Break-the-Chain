@@ -1,5 +1,9 @@
 # Break the Chain
 
+[![CI](https://github.com/guyco6742/Break-the-Chain/actions/workflows/ci.yml/badge.svg)](https://github.com/guyco6742/Break-the-Chain/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![Manifest V3](https://img.shields.io/badge/Manifest-V3-4285F4)
+
 A Chrome extension (Manifest V3) that finds **broken links, dead in-page anchors and redirect chains** — on the page you're looking at, or across a whole site.
 
 Everything runs locally in your browser. No account, no server, no telemetry, nothing to pay for.
@@ -33,6 +37,8 @@ Everything runs locally in your browser. No account, no server, no telemetry, no
 ## Install (unpacked)
 
 ```bash
+git clone https://github.com/guyco6742/Break-the-Chain.git
+cd Break-the-Chain
 npm install
 npm run build
 ```
@@ -46,7 +52,7 @@ Open any page, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> (or click the
 ```bash
 npm run dev        # rebuild on change
 npm run typecheck  # tsc --noEmit
-npm test           # unit + jsdom tests (vitest)
+npm test           # unit + DOM tests (vitest, happy-dom)
 npm run test:e2e   # loads the built extension in Chromium and scans a fixture site
 npm run zip        # build + package for the Chrome Web Store
 ```
@@ -80,7 +86,7 @@ Site crawl adds `crawler.ts` (BFS + `robots.txt` + `sitemap.xml`) which fetches 
 | `src/background/` | Service worker: scan orchestration, the checker, redirect tracking, the crawler. |
 | `src/content/` | Deep link collection, page highlighting, the floating panel. |
 | `src/popup/`, `src/report/`, `src/options/` | Extension UI. No frameworks, no jQuery. |
-| `tests/` | Vitest — 84 unit and jsdom tests. |
+| `tests/` | Vitest — 103 unit and DOM tests, run on Node 20 and 22 in CI. |
 | `e2e/` | Playwright — the extension running for real in Chromium. |
 
 ## Permissions, and why each one is needed

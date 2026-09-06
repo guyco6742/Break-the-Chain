@@ -9,11 +9,18 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Both the oldest supported runtime and the current LTS, so a
+        # dependency that quietly needs a newer Node is caught here.
+        node-version: [20, 22]
+    name: test (node ${{ matrix.node-version }})
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
       - name: Type check
@@ -27,6 +34,7 @@ jobs:
       - name: End-to-end tests
         run: npm run test:e2e
       - name: Upload unpacked extension
+        if: matrix.node-version == 22
         uses: actions/upload-artifact@v4
         with:
           name: break-the-chain-unpacked

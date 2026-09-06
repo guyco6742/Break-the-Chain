@@ -95,11 +95,12 @@ function anchorExists(root: Document | ShadowRoot, raw: string): boolean {
   if (id.toLowerCase() === 'top') return true
   const scope = root as ParentNode & { getElementById?: (v: string) => Element | null }
   if (scope.getElementById?.(id)) return true
-  try {
-    if (root.querySelector(`[name="${CSS.escape(id)}"]`)) return true
-    if (root.querySelector(`#${CSS.escape(id)}`)) return true
-  } catch {
-    /* exotic ids */
+
+  // Scanned rather than selected on purpose: ids containing a dot, colon or
+  // slash are perfectly legal in HTML but are not valid selector syntax, and
+  // CSS.escape is not available in every DOM implementation.
+  for (const el of Array.from(root.querySelectorAll('[id], [name]'))) {
+    if (el.getAttribute('id') === id || el.getAttribute('name') === id) return true
   }
   return false
 }
