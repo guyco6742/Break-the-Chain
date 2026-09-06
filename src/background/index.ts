@@ -6,7 +6,13 @@ import {
   hostOf, isEmptyHref, isInPageAnchor, isUncheckableScheme, normalizeUrl, resolveUrl,
 } from '../core/url.js'
 import { EMPTY_TOTALS, type LinkRecord, type ScanMode, type ScanState, type ScanTotals } from '../core/types.js'
-import { SESSION_KEY, type CollectedRef, type ScanProgress, type ToBackground } from '../core/messages.js'
+import {
+  SESSION_KEY,
+  type CollectedRef,
+  type PersistedSession,
+  type ScanProgress,
+  type ToBackground,
+} from '../core/messages.js'
 import { RedirectTracker } from './redirects.js'
 import { checkUrl } from './checker.js'
 import { crawlSite } from './crawler.js'
@@ -43,7 +49,7 @@ chrome.runtime.onMessage.addListener((raw, sender, sendResponse) => {
 
   switch (msg?.type) {
     case 'START_SCAN':
-      void startScan(msg.mode, msg.tabId)
+      void startScan(msg.mode, msg.tabId, msg.pageUrl)
       sendResponse({ ok: true })
       return true
     case 'STOP_SCAN':
@@ -59,10 +65,10 @@ chrome.runtime.onMessage.addListener((raw, sender, sendResponse) => {
       sendResponse({ ok: true })
       return true
     case 'GET_PROGRESS':
-      sendResponse({ progress: progressOf() })
+      void (async () => sendResponse({ progress: await progressOfAsync() }))()
       return true
     case 'GET_STATE':
-      void getState().then((state) => sendResponse({ state }))
+      void (async () => sendResponse({ state: await getState() }))()
       return true
     case 'PAGE_REFS':
       if (session && sender.tab?.id === session.tabId) ingest(msg.refs, msg.pageUrl, true)
@@ -77,11 +83,9 @@ chrome.runtime.onMessage.addListener((raw, sender, sendResponse) => {
   }
 })
 
-async function startScan(mode: ScanMode, tabId: number): Promise<void> {
+async function startScan(mode: ScanMode, tabId: number, pageUrl: string): Promise<void> {
   stopScan()
   const settings = await loadSettings()
-  const tab = await chrome.tabs.get(tabId)
-  const pageUrl = tab.url ?? ''
 
   tracker.attach()
   tracker.reset()
@@ -327,9 +331,49 @@ async function clearScan(): Promise<void> {
   if (tabId !== undefined) await sendToTab(tabId, { type: 'CLEAR_HIGHLIGHTS' })
 }
 
+/**
+ * Bring `session` back after the service worker has been torn down.
+ *
+ * MV3 kills an idle worker within about thirty seconds, which is well inside
+ * the time it takes someone to read a report and click "Re-check failures".
+ * Without this the click did nothing at all, silently.
+ */
+async function restoreSession(): Promise<Session | null> {
+  if (session) return session
+  const stored = (await chrome.storage.session.get(SESSION_KEY))[SESSION_KEY] as
+    | PersistedSession
+    | undefined
+  if (!stored) return null
+
+  const settings = await loadSettings()
+  session = {
+    id: stored.state.id,
+    mode: stored.state.mode,
+    tabId: stored.tabId,
+    origin: stored.state.origin,
+    startedAt: stored.state.startedAt,
+    running: false,
+    settings,
+    isExcluded: compileExcludes(settings.excludePatterns),
+    queue: new TaskQueue({
+      concurrency: settings.concurrency,
+      perHostConcurrency: settings.perHostConcurrency,
+      hostDelayMs: settings.hostDelayMs,
+    }),
+    records: new Map(stored.state.results.map((r) => [r.id, r])),
+    elements: new Map(stored.elements),
+    pagesCrawled: stored.state.pagesCrawled,
+    pagesQueued: 0,
+    backedOff: new Set(),
+  }
+  return session
+}
+
 async function recheckBroken(): Promise<void> {
-  const s = session
+  const s = await restoreSession()
   if (!s) return
+  tracker.attach()
+  await installBrowserLikeHeaders()
   const broken = [...s.records.values()].filter(
     (r) => r.category === 'invalid' || r.category === 'warning',
   )
@@ -368,9 +412,14 @@ function progressOf(): ScanProgress {
 }
 
 async function getState(): Promise<ScanState | null> {
-  if (session) return snapshot(session)
-  const stored = await chrome.storage.session.get(SESSION_KEY)
-  return (stored[SESSION_KEY] as ScanState | undefined) ?? null
+  const s = await restoreSession()
+  return s ? snapshot(s) : null
+}
+
+/** Like progressOf(), but revives a scan the worker has forgotten. */
+async function progressOfAsync(): Promise<ScanProgress> {
+  await restoreSession()
+  return progressOf()
 }
 
 function snapshot(s: Session): ScanState {
@@ -390,8 +439,13 @@ function snapshot(s: Session): ScanState {
 
 async function persist(): Promise<void> {
   if (!session) return
+  const payload: PersistedSession = {
+    state: snapshot(session),
+    tabId: session.tabId,
+    elements: [...session.elements.entries()],
+  }
   try {
-    await chrome.storage.session.set({ [SESSION_KEY]: snapshot(session) })
+    await chrome.storage.session.set({ [SESSION_KEY]: payload })
   } catch {
     /* over quota on a very large crawl — the live session still has the data */
   }
@@ -402,6 +456,9 @@ function scheduleBroadcast(): void {
   broadcastTimer = setTimeout(() => {
     broadcastTimer = null
     broadcast(false)
+    // Checkpoint as we go: if the worker dies mid-crawl, the results so far
+    // survive instead of vanishing with it.
+    void persist()
   }, 200)
 }
 

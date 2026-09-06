@@ -30,12 +30,14 @@ const COLORS: Record<string, string> = {
 }
 
 let tabId: number | null = null
+let pageUrl = ''
 let scannable = false
 
 async function init(): Promise<void> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
   tabId = tab?.id ?? null
-  els.site.textContent = tab?.url ?? ''
+  pageUrl = tab?.url ?? ''
+  els.site.textContent = pageUrl
 
   scannable = !!tab?.url && /^https?:/.test(tab.url)
   if (!scannable) {
@@ -77,7 +79,9 @@ async function start(mode: 'page' | 'site'): Promise<void> {
     return
   }
   els.status.textContent = mode === 'site' ? 'Crawling…' : 'Scanning…'
-  await chrome.runtime.sendMessage({ type: 'START_SCAN', mode, tabId })
+  // The URL travels with the request so the service worker never has to ask
+  // chrome.tabs for it, which would need the broad "tabs" permission.
+  await chrome.runtime.sendMessage({ type: 'START_SCAN', mode, tabId, pageUrl })
 }
 
 chrome.runtime.onMessage.addListener((raw) => {

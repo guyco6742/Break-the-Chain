@@ -23,7 +23,7 @@ export interface ScanProgress {
 }
 
 export type ToBackground =
-  | { type: 'START_SCAN'; mode: ScanMode; tabId: number }
+  | { type: 'START_SCAN'; mode: ScanMode; tabId: number; pageUrl: string }
   | { type: 'STOP_SCAN' }
   | { type: 'RECHECK_BROKEN' }
   | { type: 'CLEAR' }
@@ -45,3 +45,16 @@ export type ToPopup =
   | { type: 'STATE'; state: ScanState }
 
 export const SESSION_KEY = 'lastScan'
+
+/**
+ * Everything needed to rebuild a finished scan after the service worker has
+ * been shut down. MV3 terminates the worker whenever it is idle, so anything
+ * held only in a module variable is gone by the time the user clicks
+ * "Re-check failures" a minute later.
+ */
+export interface PersistedSession {
+  state: ScanState
+  tabId: number
+  /** record key -> the data-btc-id values that point at it. */
+  elements: [string, string[]][]
+}

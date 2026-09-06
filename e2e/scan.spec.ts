@@ -58,7 +58,7 @@ async function runScan(mode: 'page' | 'site') {
   await driver.goto(`chrome-extension://${extensionId}/report/report.html`)
 
   const records = (await driver.evaluate(
-    async ({ id, scanMode }: { id: number; scanMode: string }) => {
+    async ({ id, scanMode, url }: { id: number; scanMode: string; url: string }) => {
       const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
       const state = async () =>
         ((await chrome.runtime.sendMessage({ type: 'GET_STATE' })) as {
@@ -70,7 +70,7 @@ async function runScan(mode: 'page' | 'site') {
       // silently dropped. Re-send until the scan is actually under way.
       for (let attempt = 0; attempt < 5; attempt++) {
         await chrome.runtime
-          .sendMessage({ type: 'START_SCAN', mode: scanMode, tabId: id })
+          .sendMessage({ type: 'START_SCAN', mode: scanMode, tabId: id, pageUrl: url })
           .catch(() => {})
         for (let i = 0; i < 15; i++) {
           await sleep(200)
@@ -83,7 +83,7 @@ async function runScan(mode: 'page' | 'site') {
       }
       throw new Error('scan never started')
     },
-    { id: tabId, scanMode: mode },
+    { id: tabId, scanMode: mode, url: `${origin}/` },
   )) as ScanRecord[]
 
   return { page, driver, records }
@@ -226,6 +226,31 @@ test('a site crawl resolves in-page anchors instead of calling them broken', asy
     expect(byRaw('/missing')).toMatchObject({ category: 'invalid', status: 404 })
     expect(byRaw('/ok')).toMatchObject({ category: 'valid', status: 200 })
   })
+})
+
+test('a finished scan is persisted so the service worker can be restarted', async () => {
+  // MV3 tears the worker down when idle, taking every module variable with it.
+  // Anything the extension needs afterwards — re-checking failures, the report
+  // page, the popup's totals — has to come back out of chrome.storage.session.
+  const driver = await context.newPage()
+  await driver.goto(`chrome-extension://${extensionId}/report/report.html`)
+
+  const stored = (await driver.evaluate(async () => {
+    const all = await chrome.storage.session.get('lastScan')
+    return all.lastScan as {
+      tabId: number
+      elements: [string, string[]][]
+      state: { results: unknown[]; running: boolean; origin: string }
+    } | undefined
+  }))!
+
+  expect(stored, 'nothing was written to chrome.storage.session').toBeTruthy()
+  expect(stored.state.results.length).toBeGreaterThan(0)
+  expect(stored.state.running).toBe(false)
+  expect(typeof stored.tabId).toBe('number')
+  // Without the element map, re-checking could never repaint the page.
+  expect(stored.elements.length).toBeGreaterThan(0)
+  await driver.close()
 })
 
 test('the build output matches the source version', async () => {

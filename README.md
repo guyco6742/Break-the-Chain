@@ -113,6 +113,10 @@ If a whole domain does this to you, exclude it in the options page and check it 
 - Scheduled monitoring of saved sites, with a diff against the previous run
 - `Link:` header and `rel=canonical` checks
 
+## Publishing
+
+[`CHROMEWEBSTORE.md`](CHROMEWEBSTORE.md) holds the store listing copy, the per-permission justifications and the data-use answers. [`PRIVACY.md`](PRIVACY.md) is the privacy policy.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

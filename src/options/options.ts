@@ -56,4 +56,4 @@ document.getElementById('reset')!.addEventListener('click', async () => {
   flash()
 })
 
-void loadSettings().then(paint)
+void (async () => paint(await loadSettings()))()
