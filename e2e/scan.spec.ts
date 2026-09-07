@@ -11,6 +11,7 @@ interface ScanRecord {
   raw: string
   kind: string
   foundOn: string
+  note: string | null
   category: string
   status: number | null
   redirects: { status: number; to: string }[]
@@ -127,6 +128,14 @@ test('scans a page and classifies every kind of link correctly', async () => {
   await test.step('an empty href is flagged, and mailto: is skipped', () => {
     expect(byRaw('')?.category).toBe('empty')
     expect(records.find((r) => r.raw.startsWith('mailto:'))?.category).toBe('skipped')
+  })
+
+  await test.step('a link the browser will not let us request is skipped, not failed', () => {
+    // Chrome refuses extension requests to the Web Store; the fetch fails with a
+    // bare network error that is indistinguishable from a dead host.
+    const store = byRaw('https://chromewebstore.google.com/category/extensions')
+    expect(store?.category).toBe('skipped')
+    expect(store?.status).toBeNull()
   })
 
   await test.step('a broken image is found', () => {

@@ -18,7 +18,15 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Package for the Chrome Web Store
-        run: cd dist && zip -r ../break-the-chain-${{ github.ref_name }}.zip . -x '.*'
+        run: |
+          cd dist
+          zip -r ../break-the-chain-${{ github.ref_name }}.zip . -x '.*'
+          # A second copy under a fixed name, so
+          # /releases/latest/download/break-the-chain.zip is a permanent
+          # download link that never has to be edited when the version changes.
+          cp ../break-the-chain-${{ github.ref_name }}.zip ../break-the-chain.zip
       - uses: softprops/action-gh-release@v2
         with:
-          files: break-the-chain-*.zip
+          files: |
+            break-the-chain-*.zip
+            break-the-chain.zip

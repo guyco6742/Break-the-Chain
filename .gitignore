@@ -11,3 +11,7 @@ playwright-report/
 # Local scratch
 Claude outputs/
 *.tar.gz
+store-assets/*.wav
+
+# Supplied music: licensed to the project owner, not redistributable
+assets/soundtrack.mp3

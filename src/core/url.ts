@@ -80,3 +80,36 @@ export function looksLikeHtmlPage(input: string): boolean {
     return false
   }
 }
+
+/**
+ * Pages the browser itself refuses to let an extension request.
+ *
+ * Chrome blocks extension requests to the Web Store outright — no host
+ * permission can grant it — so a link to a Web Store page fails with a bare
+ * network error and looks exactly like a dead host. Reporting Google's own
+ * "Extensions" link as broken is a false alarm, and on a page full of them it
+ * is the difference between a trustworthy report and a useless one.
+ *
+ * Returns a human-readable reason, or null when the URL is ours to check.
+ */
+export function browserRestrictionReason(raw: string): string | null {
+  let u: URL
+  try {
+    u = new URL(raw)
+  } catch {
+    return null
+  }
+  const host = u.hostname.toLowerCase()
+  const path = u.pathname.toLowerCase()
+
+  if (host === 'chromewebstore.google.com' || (host === 'chrome.google.com' && path.startsWith('/webstore'))) {
+    return 'Chrome blocks extensions from requesting the Chrome Web Store, so this link cannot be checked from here. Open it in a tab to confirm.'
+  }
+  if (host === 'microsoftedge.microsoft.com' && path.startsWith('/addons')) {
+    return 'The browser blocks extensions from requesting the Edge Add-ons store, so this link cannot be checked from here.'
+  }
+  if (host === 'addons.mozilla.org') {
+    return 'Extension stores block automated requests from extensions, so this link cannot be checked from here.'
+  }
+  return null
+}

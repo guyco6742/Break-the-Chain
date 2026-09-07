@@ -107,6 +107,11 @@ Certify in the dashboard's data-use form:
 | Screenshots | 1280×800, 1–5 | ✅ `store-assets/screenshot-1-scan.png`, `-2-report.png`, `-3-settings.png` |
 | Small promo tile | 440×280 | ✅ `store-assets/promo-small-440x280.png` |
 | Marquee promo tile | 1400×560 | ✅ `store-assets/promo-marquee-1400x560.png` |
+| YouTube portrait cover | 1152×2048 | ✅ `store-assets/youtube-portrait-1152x2048.png` — `npm run poster` |
+| YouTube channel banner | 2048×1152 | ✅ `store-assets/youtube-banner-2048x1152.png` — `npm run banner`. Everything readable sits inside the central 1235×338 safe area, which is all a phone shows. `BANNER_GUIDES=1 npm run banner` renders a copy with that box drawn. |
+| Demo video | 34 s, 1280×800 | ✅ `store-assets/demo.mp4` — upload to YouTube (unlisted is fine) and paste the link in the listing |
+
+**Music:** the video uses a supplied track from `assets/soundtrack.mp3`, which is **not committed** — check its licence and credit the artist in the YouTube description if it asks you to. Most "no copyright" tracks are free to use but still require attribution. With that file absent, `npm run video` falls back to the generated soundtrack, so the pipeline always runs.
 
 Regenerate any of them with `npm run screenshots` — it drives the real built extension against a demo site, so they can never drift from what the extension actually looks like.
 
@@ -133,6 +138,7 @@ Screenshots worth taking: a page mid-scan with links coloured and the panel show
 
 | Version | Date | Change |
 |---|---|---|
+| 1.0.13 | 2026-09-06 | Chrome Web Store links are skipped with an explanation instead of reported broken; demo video and GIF |
 | 1.0.10 | 2026-09-06 | Result chips label statusless results correctly (a working `#anchor` said ERR on a green chip); store assets generated |
 | 1.0.9 | 2026-09-06 | Scan state survives a service-worker restart; the scanned URL is passed from the popup instead of read from the tabs API |
 | 1.0.8 | 2026-09-06 | Removed modulepreload tags from extension pages; e2e guard against a stale `dist` |

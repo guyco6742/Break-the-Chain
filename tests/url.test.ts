@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   normalizeUrl, isEmptyHref, isInPageAnchor, isUncheckableScheme,
-  resolveUrl, sameOrigin, looksLikeHtmlPage, hostOf,
+  resolveUrl, sameOrigin, looksLikeHtmlPage, hostOf, browserRestrictionReason,
 } from '../src/core/url.js'
 
 describe('normalizeUrl', () => {
@@ -78,5 +78,33 @@ describe('looksLikeHtmlPage', () => {
   it('accepts pages and extensionless paths', () => {
     for (const v of ['https://a.com/about', 'https://a.com/a.html', 'https://a.com/'])
       expect(looksLikeHtmlPage(v)).toBe(true)
+  })
+})
+
+describe('browserRestrictionReason', () => {
+  it('flags the Chrome Web Store, which Chrome will not let an extension request', () => {
+    // Seen in the wild on google.com/chrome: four "broken" links, all of them
+    // Google's own Web Store links, all of them perfectly alive.
+    for (const url of [
+      'https://chromewebstore.google.com/category/extensions',
+      'https://chromewebstore.google.com/?hl=en',
+      'https://chrome.google.com/webstore/category/extensions',
+    ]) {
+      expect(browserRestrictionReason(url), url).toMatch(/Chrome blocks extensions/)
+    }
+  })
+  it('leaves the rest of chrome.google.com alone', () => {
+    expect(browserRestrictionReason('https://chrome.google.com/')).toBeNull()
+  })
+  it('flags the other extension stores too', () => {
+    expect(browserRestrictionReason('https://addons.mozilla.org/firefox/')).not.toBeNull()
+    expect(browserRestrictionReason('https://microsoftedge.microsoft.com/addons/detail/x')).not.toBeNull()
+  })
+  it('says nothing about an ordinary url', () => {
+    expect(browserRestrictionReason('https://example.com/a')).toBeNull()
+    expect(browserRestrictionReason('not a url')).toBeNull()
+  })
+  it('is case-insensitive about the host', () => {
+    expect(browserRestrictionReason('https://ChromeWebStore.Google.com/x')).not.toBeNull()
   })
 })

@@ -3,7 +3,8 @@ import { TaskQueue } from '../core/queue.js'
 import { compileExcludes } from '../core/exclude.js'
 import { classifyStatus, statusNote } from '../core/classify.js'
 import {
-  hostOf, isEmptyHref, isInPageAnchor, isUncheckableScheme, normalizeUrl, resolveUrl,
+  browserRestrictionReason, hostOf, isEmptyHref, isInPageAnchor, isUncheckableScheme,
+  normalizeUrl, resolveUrl,
 } from '../core/url.js'
 import { EMPTY_TOTALS, type LinkRecord, type ScanMode, type ScanState, type ScanTotals } from '../core/types.js'
 import {
@@ -171,7 +172,7 @@ function ingest(refs: CollectedRef[], pageUrl: string, fromLivePage: boolean): v
       contentType: null,
       durationMs: null,
       error: decided.error,
-      note: null,
+      note: decided.note ?? null,
       occurrences: 1,
       checkedAt: Date.now(),
     }
@@ -192,6 +193,7 @@ interface Decision {
   url: string
   category: LinkRecord['category']
   error: string | null
+  note?: string | null
 }
 
 function decide(ref: CollectedRef, pageUrl: string, s: Session): Decision {
@@ -239,6 +241,12 @@ function decide(ref: CollectedRef, pageUrl: string, s: Session): Decision {
   }
   if (s.isExcluded(normalized)) {
     return { key: normalized, url: normalized, category: 'excluded', error: null }
+  }
+  const restricted = browserRestrictionReason(normalized)
+  if (restricted) {
+    // Skipped rather than checked: the request would fail for a reason that has
+    // nothing to do with whether the link works.
+    return { key: normalized, url: normalized, category: 'skipped', error: null, note: restricted }
   }
   return { key: normalized, url: normalized, category: 'pending', error: null }
 }

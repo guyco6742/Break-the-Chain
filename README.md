@@ -25,6 +25,7 @@ Everything runs locally in your browser. No account, no server, no telemetry, no
 
 ### Design decisions worth knowing about
 
+- **Links the browser itself blocks are skipped, not failed.** Chrome refuses extension requests to the Chrome Web Store — no permission can grant it — so those links fail with a bare network error indistinguishable from a dead host. Scanning `google.com/chrome` used to report four "broken" links, all of them Google's own Web Store links, all alive.
 - **Heading permalinks are understood.** GitHub, GitLab and most markdown renderers give a heading `id="user-content-slug"` while linking to `#slug`, and bridge the two in JavaScript. Checked literally, every heading permalink on GitHub is a dead anchor; that prefix is resolved, so they are not.
 - **`401` / `403` / `429` are warnings, not failures.** They usually mean the resource exists and is refusing an unauthenticated HEAD from an extension. Treating them as broken is the biggest source of false positives in link checkers.
 - **A 429 slows the scan down instead of failing the link.** When a host rate-limits us, every queued request for that host is held back for the `Retry-After` it asked for (capped at two minutes) and the URL gets one more try. Without that, a scan can get *your own IP* throttled by the site — and the link you were checking stops working in your browser too.
@@ -49,11 +50,17 @@ Open any page, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> (or click the
 
 ## Development
 
+The visual scripts below and the end-to-end tests drive a real browser, so a
+one-off `npx playwright install chromium` is needed before the first run.
+
 ```bash
 npm run dev        # rebuild on change
 npm run typecheck  # tsc --noEmit
 npm test           # unit + DOM tests (vitest, happy-dom)
 npm run test:e2e   # loads the built extension in Chromium and scans a fixture site
+npm run screenshots # regenerate the store screenshots from a real scan
+npm run video      # record the demo video and GIF from a real scan
+                   # (drops in assets/soundtrack.mp3 if present, else generates one)
 npm run zip        # build + package for the Chrome Web Store (Windows, macOS, Linux)
 ```
 
@@ -86,7 +93,7 @@ Site crawl adds `crawler.ts` (BFS + `robots.txt` + `sitemap.xml`) which fetches 
 | `src/background/` | Service worker: scan orchestration, the checker, redirect tracking, the crawler. |
 | `src/content/` | Deep link collection, page highlighting, the floating panel. |
 | `src/popup/`, `src/report/`, `src/options/` | Extension UI. No frameworks, no jQuery. |
-| `tests/` | Vitest — 117 unit and DOM tests, run on Node 20 and 22 in CI. |
+| `tests/` | Vitest — 128 unit and DOM tests, run on Node 20 and 22 in CI. |
 | `e2e/` | Playwright — the extension running for real in Chromium: a page scan, a site crawl, a clean build output and a clean console. |
 
 ## Permissions, and why each one is needed
@@ -112,9 +119,18 @@ If a whole domain does this to you, exclude it in the options page and check it 
 - Scheduled monitoring of saved sites, with a diff against the previous run
 - `Link:` header and `rel=canonical` checks
 
+## Install
+
+Download the latest build:
+<https://github.com/guyco6742/Break-the-Chain/releases/latest/download/break-the-chain.zip>
+
+Unzip it, open `chrome://extensions`, turn on **Developer mode**, click **Load
+unpacked** and pick the unzipped folder. That link always points at the newest
+release, so it never goes stale.
+
 ## Publishing
 
-[`CHROMEWEBSTORE.md`](CHROMEWEBSTORE.md) holds the store listing copy, the per-permission justifications and the data-use answers. [`PRIVACY.md`](PRIVACY.md) is the privacy policy.
+[`YOUTUBE.md`](YOUTUBE.md) holds the demo video's title and description. [`CHROMEWEBSTORE.md`](CHROMEWEBSTORE.md) holds the store listing copy, the per-permission justifications and the data-use answers. [`PRIVACY.md`](PRIVACY.md) is the privacy policy.
 
 ## License
 
